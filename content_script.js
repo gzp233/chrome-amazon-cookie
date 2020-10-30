@@ -23,26 +23,41 @@ const ue_furls = {
     'fls-eu.amazon.it': 'IT',
     'fls-eu.amazon.es': 'ES',
     'fls-eu.amazon.nl': 'NL',
-    'fls-eu.amazon.com': 'SE',
+    'fls-eu.amazon.se': 'SE',
     'fls-fe.amazon.co.jp': 'JP'
 }
 
-// 获取实际国家
 function getCountry() {
-    let re = /ue_furl[\s=]+'([-\w.]+)'/
     const scripts = window.document.getElementsByTagName("script")
+    let authority = ''
+    let feUrl = ''
     for (let script of scripts) {
-        let matches = re.exec(script.innerHTML)
-        if (matches && ue_furls.hasOwnProperty(matches[1])) {
-            sendData(ue_furls[matches[1]])
+        let matches = /ue_sn[\s=]+'([-\w.]+)'/.exec(script.innerHTML)
+        if (matches && matches[1]) {
+            authority = matches[1]
+        }
+
+        let matches2 = /ue_furl[\s=]+'([-\w.]+)'/.exec(script.innerHTML)
+        if (matches2 && ue_furls.hasOwnProperty(matches2[1])) {
+            feUrl = matches2[1]
+        }
+        if (authority && feUrl) {
+            sendData(authority, feUrl)
+            break
         }
     }
+
 }
 
 //发送国家信息到 background 处理
-function sendData(country) {
-    chrome.runtime.sendMessage({country: country, url: document.URL}, async function (response) {
-        // TODO 可以写点页面处理
+function sendData(authority, feUrl) {
+    const params = {
+        authority: authority,
+        country: ue_furls[feUrl],
+        domain: window.location.host
+    }
+    chrome.runtime.sendMessage(params, async function (response) {
+        console.log(response)
     });
 }
 
@@ -54,8 +69,3 @@ function watchAmazon() {
         getCountry()
     }
 }
-
-
-
-
-
