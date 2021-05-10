@@ -38,7 +38,7 @@ function sendData(request) {
     }
     $.ajax({
         type: "POST",
-        url: "http://abc/api/cookie",
+        url: "http://ads.laborsing.com/api/cookie",
         data: params,
         success: function () {
             notifySuccess(request.country)
